@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo Plaza Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ================== SETTINGS: edit these lines ================== */
+const CONFIG = {
+  mallName: "Demo Plaza",
+  tagline:  "Find any shop in seconds",
+  // Building logo: a web link to an image (a Google Drive share link works). Leave "" to show initials.
+  logoUrl:  "",
+  // Your Google Sheet, published as CSV (File > Share > Publish to web > CSV). Leave "" to use the list built into this file.
+  sheetCsvUrl: "",
+  // Link the QR code opens. Leave "" to use this page's own address.
+  qrLink: "",
+  // How often the page re-checks the sheet, in minutes (useful for the TV).
+  refreshMinutes: 5
+};
+/* ================================================================ */
+</script>
+<style>
+/* Layout idea: a signage-style header band, then a searchable directory or a TV/board view, grouped by floor or by colour-coded category. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#13202a; --muted:#5a6a77; --line:#dbe2e8;
+  --accent:#0a6a9e; --accent-ink:#ffffff; --band:#0d2b3e; --band-ink:#ffffff;
+  --c-food:#e0712c; --c-fashion:#cf4279; --c-tech:#2d6bd3; --c-bank:#2a955a;
+  --c-health:#8853c6; --c-grocery:#b98d0c; --c-services:#687581; --c-other:#46525d;
+  --warn:#c27c0e;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e151b; --surface:#16212a; --ink:#e6edf2; --muted:#98a9b6; --line:#283643;
+    --accent:#4cade0; --accent-ink:#04202e; --band:#0a1f2d; --band-ink:#e6edf2; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e151b; --surface:#16212a; --ink:#e6edf2; --muted:#98a9b6; --line:#283643;
+  --accent:#4cade0; --accent-ink:#04202e; --band:#0a1f2d; --band-ink:#e6edf2; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body)}
+img{max-width:100%}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+.top{background:var(--band);color:var(--band-ink);padding:14px 20px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-logo{width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.12);display:grid;place-items:center;overflow:hidden;flex:none;font:800 20px var(--display)}
+.brand-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.brand h1{font-size:22px;font-weight:800;letter-spacing:.01em}
+.brand p{margin:2px 0 0;opacity:.75;font-size:13px}
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,.08);padding:4px;border-radius:999px}
+.tabs a{color:var(--band-ink);padding:7px 16px;border-radius:999px;font-weight:600;font-size:14px;text-decoration:none}
+.tabs a[aria-current="page"]{background:var(--band-ink);color:var(--band)}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+.notice{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--warn);padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:14px}
+.dir-head{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.search{flex:1 1 280px;position:relative}
+.search input{width:100%;padding:12px 14px 12px 40px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font-size:16px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+select{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip small{opacity:.6;font-weight:500}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.board-head .seg{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25)}
+.board-head .seg button{color:var(--band-ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.fsec+.fsec{margin-top:26px}
+.fh{display:flex;align-items:baseline;gap:10px;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding-bottom:8px;margin-bottom:12px;border-bottom:3px solid var(--ink)}
+.fh small{font:500 13px var(--body);color:var(--muted);text-transform:none;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;grid-template-columns:56px 1fr;gap:12px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cat)}
+.logo{width:56px;height:56px;border-radius:9px;display:grid;place-items:center;overflow:hidden;background:var(--cat);color:#fff;font:800 18px var(--display)}
+.logo img,.mini img{width:100%;height:100%;object-fit:contain;background:#fff}
+.card h3{font-size:17px;font-weight:700}
+.meta{color:var(--muted);font-size:13px;margin-top:2px}
+.where{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.where span{white-space:nowrap;background:var(--bg);border:1px solid var(--line);padding:1px 8px;border-radius:6px}
+.actions{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.actions a{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.pill{display:inline-block;margin-bottom:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--warn);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
+.qr-strip{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;margin-top:22px}
+.qr-box{background:#fff;padding:6px;border-radius:6px;flex:none;line-height:0}
+.hint{font-size:13px;color:var(--muted)}
+.board{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.board-head{background:var(--band);color:var(--band-ink);padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.board-head h2{font-size:34px;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.board-head p{margin:4px 0 0;opacity:.8;font-size:15px}
+.board-cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.bcat{padding:18px 22px;border-top:1px solid var(--line);border-right:1px solid var(--line)}
+.bcat h3{display:flex;align-items:center;gap:10px;font-size:18px;text-transform:uppercase;letter-spacing:.04em;padding-bottom:8px;margin-bottom:6px;border-bottom:3px solid var(--cat)}
+.bcat h3 i{width:14px;height:14px;border-radius:4px;background:var(--cat)}
+.brow{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:17px}
+.mini{width:30px;height:30px;border-radius:6px;overflow:hidden;background:var(--cat);display:grid;place-items:center;color:#fff;font:800 12px var(--display)}
+.brow b{font-weight:600}
+.brow em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);padding:12px 26px;border-top:1px solid var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px}
+.board-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 26px;border-top:1px solid var(--line);flex-wrap:wrap}
+.board-foot .scan{display:flex;align-items:center;gap:14px}
+.board-foot strong{font:800 20px var(--display)}
+.ghost{border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--band-ink);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+.board:fullscreen{overflow:auto;border-radius:0}
+.board:fullscreen .brow{font-size:22px}
+footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="brand-logo" id="brandLogo"></div><div><h1 id="brandName"></h1><p id="brandTag"></p></div></div>
+  <nav class="tabs" aria-label="Views"><a href="#directory" id="tabDir">Directory</a><a href="#board" id="tabBoard">Board view</a></nav>
+</header>
+<main id="main"></main>
+<footer id="foot"></footer>
+
+<script>
+const FALLBACK_CSV=`name,category,floor,shop,phone,hours,status,logo
+FreshMart Supermarket,Supermarket & Grocery,Ground Floor,A-01,0700100001,,Open,
+Kenya Demo Bank,Banks & Forex,Ground Floor,G-01,0700100002,,Open,
+Urban Threads,Fashion & Shoes,Ground Floor,G-02,0700100003,,Open,
+Sole Mates Shoes,Fashion & Shoes,Ground Floor,G-03,0700100004,,Open,
+PhoneHub,Phones & Electronics,Ground Floor,G-04,0700100005,,Open,
+Glow Beauty Salon,Health & Beauty,Ground Floor,G-05,0700100006,,Open,
+Health First Pharmacy,Health & Beauty,Ground Floor,G-06,0700100007,,Open,
+Savanna Grill,Food & Restaurants,Ground Floor,"G-07, G-08",0700100008,,Open,
+Java Corner,Food & Restaurants,Ground Floor,G-09,0700100009,,Open,
+Kids Kingdom,Other,Ground Floor,G-10,0700100010,,Open,
+Sweet Bites Kiosk,Food & Restaurants,Ground Floor,K-01,0700100011,,Open,
+Airtime Express,Services,Ground Floor,K-02,0700100012,,Open,
+Style Avenue,Fashion & Shoes,1st Floor,F-01,0700100013,,Open,
+Gadget World,Phones & Electronics,1st Floor,F-02,0700100014,,Open,
+Smile Dental Clinic,Health & Beauty,1st Floor,F-03,0700100015,,Coming Soon,
+Fit Zone Gym,Health & Beauty,1st Floor,F-04,0700100016,,Open,
+Bookworm Stationers,Services,1st Floor,F-06,0700100017,,Vacant,
+Golden Jewellers,Fashion & Shoes,1st Floor,F-07,0700100018,,Vacant,
+Example Associates,Services,2nd Floor,S-01,0700100019,,Open,
+Wakili & Co. Advocates,Services,2nd Floor,S-02,0700100020,,Coming Soon,
+Bright Futures Insurance,Services,2nd Floor,S-03,0700100021,,Open,
+Mega Tutors,Services,2nd Floor,S-04,0700100022,,Open,
+`;
+const CATS=[
+  {k:"Food & Restaurants",v:"--c-food"},{k:"Fashion & Shoes",v:"--c-fashion"},
+  {k:"Phones & Electronics",v:"--c-tech"},{k:"Banks & Forex",v:"--c-bank"},
+  {k:"Health & Beauty",v:"--c-health"},{k:"Supermarket & Grocery",v:"--c-grocery"},
+  {k:"Services",v:"--c-services"},{k:"Other",v:"--c-other"}];
+const FLOORS=["Ground Floor","1st Floor","2nd Floor","3rd Floor","4th Floor","Basement"];
+const S={tenants:[],loaded:false,error:"",updated:null,view:"directory",group:"floor",q:"",cat:"All",floor:"All"};
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const catOf=k=>CATS.find(c=>c.k===k)||CATS[CATS.length-1];
+const initials=n=>(n||"?").split(/\s+/).filter(w=>/^[A-Za-z0-9]/.test(w)).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const floorRank=f=>{const i=FLOORS.indexOf(f);return i<0?99:i};
+const byFloor=(a,b)=>floorRank(a.floor)-floorRank(b.floor)||a.name.localeCompare(b.name);
+function imgUrl(u){u=String(u||"").trim();if(!/^https?:\/\//i.test(u))return"";
+  const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:.*&)?id=)([\w-]+)/);return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`:u}
+function waLink(p){let d=String(p||"").replace(/\D/g,"");if(!d)return"";if(d.startsWith("0"))d="254"+d.slice(1);return"https://wa.me/"+d}
+const logoHTML=(t,cls="logo")=>`<div class="${cls}" style="--cat:var(${catOf(t.category).v})">${t.logo?`<img src="${esc(t.logo)}" alt="${esc(t.name)} logo" loading="lazy" onerror="this.replaceWith(document.createTextNode('${esc(initials(t.name))}'))">`:esc(initials(t.name))}</div>`;
+const shortFloor=f=>({"Basement":"B","Ground Floor":"GF","1st Floor":"1F","2nd Floor":"2F","3rd Floor":"3F","4th Floor":"4F"})[f]||f||"";
+
+/* ---- reading the list ---- */
+function parseCSV(t){const rows=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"')q=true;else if(c===","){r.push(f);f=""}else if(c==="\n"){r.push(f);rows.push(r);r=[];f=""}else if(c!=="\r")f+=c}
+  if(f||r.length){r.push(f);rows.push(r)}return rows.filter(x=>x.some(v=>v.trim()))}
+function matchCat(v){v=String(v||"").toLowerCase().trim();if(!v)return"Other";
+  const hit=CATS.find(c=>c.k.toLowerCase()===v)||CATS.find(c=>c.k.toLowerCase().split(/[ &]+/).some(w=>w.length>3&&v.includes(w)));return hit?hit.k:"Other"}
+function matchFloor(v){v=String(v||"").toLowerCase().trim();if(!v)return"Ground Floor";
+  if(/^(g|gf|ground)/.test(v))return"Ground Floor";if(/^(b|basement|lower)/.test(v))return"Basement";
+  if(/^first/.test(v))return"1st Floor";if(/^second/.test(v))return"2nd Floor";if(/^third/.test(v))return"3rd Floor";if(/^fourth/.test(v))return"4th Floor";
+  const n=v.match(/\d/);return n&&FLOORS.find(f=>f.startsWith(n[0]))||"Ground Floor"}
+function matchStatus(v){v=String(v||"").toLowerCase().trim();
+  if(/coming|offer|soon/.test(v))return"Coming Soon";if(/vacant|vacated|closed|prospect|hide/.test(v))return"Vacant";return"Open"}
+function toTenants(text){
+  const rows=parseCSV(text);if(rows.length<2)return[];
+  const head=rows[0].map(h=>h.toLowerCase().trim());
+  const col=(...n)=>head.findIndex(h=>n.some(x=>h===x));
+  const col2=(...n)=>{const e=col(...n);return e>=0?e:head.findIndex(h=>n.some(x=>h.includes(x)))};
+  const ix={name:col2("name","trading name","shop name","tenant"),category:col2("category"),floor:col2("floor","level"),
+    shop:col("shop","shop no","shop number","unit"),phone:col2("phone","whatsapp"),hours:col2("hours"),status:col2("status"),logo:col2("logo")};
+  return rows.slice(1).map(r=>{const g=k=>ix[k]>=0?String(r[ix[k]]||"").trim():"";
+    return{name:g("name"),category:matchCat(g("category")),floor:matchFloor(g("floor")),shop:g("shop"),phone:g("phone"),hours:g("hours"),status:matchStatus(g("status")),logo:imgUrl(g("logo"))}})
+    .filter(t=>t.name);
+}
+async function load(){
+  if(CONFIG.sheetCsvUrl){
+    try{const sep=CONFIG.sheetCsvUrl.includes("?")?"&":"?";
+      const r=await fetch(CONFIG.sheetCsvUrl+sep+"t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;
+      const list=toTenants(await r.text());if(!list.length)throw 0;
+      S.tenants=list;S.error="";S.updated=new Date();S.loaded=true;return}
+    catch(e){S.error=S.tenants.length?"Couldn't refresh the shop list just now. Showing the last version.":"";if(S.tenants.length){S.loaded=true;return}}
+  }
+  S.tenants=toTenants(FALLBACK_CSV);S.updated=S.updated||null;S.loaded=true;
+}
+
+/* ---- header ---- */
+function paintHeader(){
+  document.title=(CONFIG.mallName||"Mall")+" Directory";
+  $("#brandName").textContent=CONFIG.mallName||"Mall Directory";$("#brandTag").textContent=CONFIG.tagline||"";
+  const lg=imgUrl(CONFIG.logoUrl);$("#brandLogo").innerHTML=lg?`<img src="${esc(lg)}" alt="${esc(CONFIG.mallName)} logo">`:esc(initials(CONFIG.mallName||"Mall"));
+  $("#tabDir").toggleAttribute("aria-current",S.view==="directory");if(S.view==="directory")$("#tabDir").setAttribute("aria-current","page");
+  $("#tabBoard").toggleAttribute("aria-current",S.view==="board");if(S.view==="board")$("#tabBoard").setAttribute("aria-current","page");
+  $("#foot").textContent=S.updated?`Shop list updated ${S.updated.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`:"";
+}
+const qrLink=()=>CONFIG.qrLink||location.href.split("#")[0];
+function drawQR(el,size){if(!el||typeof QRCode==="undefined")return;el.innerHTML="";new QRCode(el,{text:qrLink(),width:size,height:size,colorDark:"#13202a",colorLight:"#ffffff"})}
+function segHTML(){return `<div class="seg" role="group" aria-label="Group shops by"><button type="button" data-group="floor" aria-pressed="${S.group==="floor"}">By floor</button><button type="button" data-group="category" aria-pressed="${S.group==="category"}">By category</button></div>`}
+function wireSeg(root){root.querySelectorAll("[data-group]").forEach(b=>b.addEventListener("click",()=>{S.group=b.dataset.group;
+  root.querySelectorAll("[data-group]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.group===S.group?"true":"false"));refresh()}))}
+function floorGroups(list){const out=[];[...list].sort(byFloor).forEach(t=>{let g=out.find(x=>x.f===t.floor);if(!g){g={f:t.floor,items:[]};out.push(g)}g.items.push(t)});return out}
+const visible=()=>S.tenants.filter(t=>t.status!=="Vacant");
+
+/* ---- views ---- */
+function show(){
+  S.view=location.hash==="#board"?"board":"directory";
+  const m=$("#main");
+  if(S.view==="directory"){
+    m.innerHTML=`<div id="note"></div>
+    <div class="dir-head">
+      <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="q" type="search" placeholder="Search shops, e.g. pharmacy, bank, shoes" aria-label="Search shops" value="${esc(S.q)}"></div>
+      <select id="floorf" aria-label="Filter by floor"><option value="All">All floors</option>${FLOORS.map(f=>`<option ${S.floor===f?"selected":""}>${f}</option>`).join("")}</select>
+      ${segHTML()}
+    </div>
+    <div class="chips" id="chips"></div>
+    <div id="grid"></div>
+    <div class="qr-strip"><div class="qr-box" id="qrDir"></div><div><strong>Take the directory with you</strong><div class="hint">Scan to open this directory on your phone.</div></div></div>`;
+    $("#q").addEventListener("input",e=>{S.q=e.target.value;fillDirectory()});
+    $("#floorf").addEventListener("change",e=>{S.floor=e.target.value;fillDirectory()});
+    wireSeg(m);drawQR($("#qrDir"),96);
+  }else{
+    m.innerHTML=`<div id="note"></div><div class="board" id="board"></div>`;
+  }
+  refresh();
+}
+function refresh(){
+  paintHeader();
+  const n=$("#note");if(n)n.innerHTML=S.error?`<div class="notice">${esc(S.error)}</div>`:"";
+  S.view==="directory"?fillDirectory():fillBoard();
+}
+function fillDirectory(){
+  const grid=$("#grid");if(!grid)return;
+  const all=visible();const counts={};all.forEach(t=>{counts[t.category]=(counts[t.category]||0)+1});
+  $("#chips").innerHTML=`<button type="button" class="chip" data-cat="All" aria-pressed="${S.cat==="All"}">All <small>${all.length}</small></button>`+
+    CATS.filter(c=>counts[c.k]).map(c=>`<button type="button" class="chip" data-cat="${esc(c.k)}" aria-pressed="${S.cat===c.k}"><i style="background:var(${c.v})"></i>${esc(c.k)} <small>${counts[c.k]}</small></button>`).join("");
+  $("#chips").querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{S.cat=b.dataset.cat;fillDirectory()}));
+  if(!S.loaded){grid.innerHTML=`<div class="empty">Loading shops…</div>`;return}
+  const q=S.q.trim().toLowerCase();
+  const list=all.filter(t=>(S.cat==="All"||t.category===S.cat)&&(S.floor==="All"||t.floor===S.floor)&&
+    (!q||[t.name,t.category,t.shop,t.floor].join(" ").toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
+  const card=t=>{const c=catOf(t.category);const wa=waLink(t.phone);
+    return `<article class="card" style="--cat:var(${c.v})">${logoHTML(t)}
+      <div>${t.status==="Coming Soon"?`<span class="pill">Coming soon</span>`:""}<h3>${esc(t.name)}</h3><div class="meta">${esc(c.k)}${t.hours?" · "+esc(t.hours):""}</div>
+      <div class="where">${t.floor?`<span>${esc(t.floor)}</span>`:""}${t.shop?`<span>Shop ${esc(t.shop)}</span>`:""}</div>
+      ${t.phone?`<div class="actions"><a href="tel:${esc(t.phone.replace(/\s/g,""))}">Call ${esc(t.phone)}</a>${wa?`<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:""}</div>`:""}</div></article>`};
+  grid.innerHTML=!list.length?`<div class="empty">${S.tenants.length?"No shops match your search.":"No shops listed yet."}</div>`:
+    S.group==="floor"?floorGroups(list).map(g=>`<section class="fsec"><h2 class="fh">${esc(g.f)}<small>${g.items.length} ${g.items.length===1?"shop":"shops"}</small></h2><div class="grid">${g.items.map(card).join("")}</div></section>`).join(""):
+    `<div class="grid">${list.map(card).join("")}</div>`;
+}
+function fillBoard(){
+  const b=$("#board");if(!b)return;const all=visible();
+  const groups=S.group==="floor"
+    ?floorGroups(all).map(g=>({title:g.f,color:"var(--ink)",items:g.items,tag:t=>t.shop}))
+    :CATS.map(c=>({title:c.k,color:`var(${c.v})`,items:all.filter(t=>t.category===c.k).sort(byFloor),tag:t=>[t.shop,shortFloor(t.floor)].filter(Boolean).join(" · ")})).filter(g=>g.items.length);
+  const used=CATS.filter(c=>all.some(t=>t.category===c.k));const lg=imgUrl(CONFIG.logoUrl);
+  b.innerHTML=`<div class="board-head"><div class="brand"><div class="brand-logo" style="width:64px;height:64px">${lg?`<img src="${esc(lg)}" alt="">`:esc(initials(CONFIG.mallName||"Mall"))}</div>
+      <div><h2>${esc(CONFIG.mallName||"Mall Directory")}</h2><p>Karibu · Welcome · Shop directory</p></div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${segHTML()}<button type="button" class="ghost" id="fs">Full screen</button></div></div>
+    <div class="board-cols">${groups.length?groups.map(g=>`<section class="bcat" style="--cat:${g.color}"><h3><i></i>${esc(g.title)}</h3>
+      ${g.items.map(t=>`<div class="brow" style="--cat:var(${catOf(t.category).v})">${logoHTML(t,"mini")}<b>${esc(t.name)}${t.status==="Coming Soon"?' <small class="hint">(coming soon)</small>':""}</b><em>${esc(g.tag(t))}</em></div>`).join("")}
+    </section>`).join(""):`<div class="empty" style="margin:20px">${S.loaded?"No shops listed yet.":"Loading shops…"}</div>`}</div>
+    ${S.group==="floor"&&used.length?`<div class="legend">${used.map(c=>`<span><i style="background:var(${c.v})"></i>${esc(c.k)}</span>`).join("")}</div>`:""}
+    <div class="board-foot"><div class="scan"><div class="qr-box" id="qrBoard"></div><div><strong>Can't find it? Scan here</strong><div class="hint">Search every shop on your phone</div></div></div>
+      <div class="hint">${all.length} shops</div></div>`;
+  drawQR($("#qrBoard"),110);wireSeg(b);
+  $("#fs").addEventListener("click",()=>{try{document.fullscreenElement?document.exitFullscreen():b.requestFullscreen()}catch(e){}});
+}
+
+window.addEventListener("hashchange",show);
+show();
+load().then(refresh);
+if(CONFIG.sheetCsvUrl&&CONFIG.refreshMinutes>0)setInterval(()=>load().then(refresh),CONFIG.refreshMinutes*60000);
+</script>
+</body>
+</html>
