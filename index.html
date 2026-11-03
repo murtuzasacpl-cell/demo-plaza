@@ -16,9 +16,9 @@ const CONFIG = {
   // Building logo: a web link to an image (a Google Drive share link works). Leave "" to show initials.
   logoUrl:  "",
   // Your Google Sheet, published as CSV (File > Share > Publish to web > CSV). Leave "" to use the list built into this file.
-       sheetCsvUrl: "https://docs.google.com/spreadsheets/d/1UeQHnamo87ndQzJPmWbUvX6vuoOV-PgNdPAfhAcpgGo/gviz/tq?tqx=out:csv",
+  sheetCsvUrl: "https://docs.google.com/spreadsheets/d/1UeQHnamo87ndQzJPmWbUvX6vuoOV-PgNdPAfhAcpgGo/gviz/tq?tqx=out:csv",
   // Link the QR code opens. Leave "" to use this page's own address.
-  qrLink: "",
+  qrLink: "https://murtuzasacpl-cell.github.io/demo-plaza/",
   // How often the page re-checks the sheet, in minutes (useful for the TV).
   refreshMinutes: 5
 };
@@ -96,7 +96,7 @@ select{padding:10px 12px;border:1px solid var(--line);border-radius:8px;backgrou
 .pill{display:inline-block;margin-bottom:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--warn);color:#fff;text-transform:uppercase;letter-spacing:.04em}
 .empty{padding:40px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
 .qr-strip{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;margin-top:22px}
-.qr-box{background:#fff;padding:6px;border-radius:6px;flex:none;line-height:0}
+.qr-box{background:#fff;padding:12px;border-radius:6px;flex:none;line-height:0}
 .hint{font-size:13px;color:var(--muted)}
 .board{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .board-head{background:var(--band);color:var(--band-ink);padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -220,7 +220,7 @@ function paintHeader(){
   $("#foot").textContent=S.updated?`Shop list updated ${S.updated.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`:"";
 }
 const qrLink=()=>CONFIG.qrLink||location.href.split("#")[0];
-function drawQR(el,size){if(!el||typeof QRCode==="undefined")return;el.innerHTML="";new QRCode(el,{text:qrLink(),width:size,height:size,colorDark:"#13202a",colorLight:"#ffffff"})}
+function drawQR(el,size){if(!el||typeof QRCode==="undefined")return;el.innerHTML="";new QRCode(el,{text:qrLink(),width:size,height:size,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M})}
 function segHTML(){return `<div class="seg" role="group" aria-label="Group shops by"><button type="button" data-group="floor" aria-pressed="${S.group==="floor"}">By floor</button><button type="button" data-group="category" aria-pressed="${S.group==="category"}">By category</button></div>`}
 function wireSeg(root){root.querySelectorAll("[data-group]").forEach(b=>b.addEventListener("click",()=>{S.group=b.dataset.group;
   root.querySelectorAll("[data-group]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.group===S.group?"true":"false"));refresh()}))}
@@ -244,7 +244,7 @@ function show(){
     <div class="qr-strip"><div class="qr-box" id="qrDir"></div><div><strong>Take the directory with you</strong><div class="hint">Scan to open this directory on your phone.</div></div></div>`;
     $("#q").addEventListener("input",e=>{S.q=e.target.value;fillDirectory()});
     $("#floorf").addEventListener("change",e=>{S.floor=e.target.value;fillDirectory()});
-    wireSeg(m);drawQR($("#qrDir"),96);
+    wireSeg(m);drawQR($("#qrDir"),150);
   }else{
     m.innerHTML=`<div id="note"></div><div class="board" id="board"></div>`;
   }
@@ -289,7 +289,7 @@ function fillBoard(){
     ${S.group==="floor"&&used.length?`<div class="legend">${used.map(c=>`<span><i style="background:var(${c.v})"></i>${esc(c.k)}</span>`).join("")}</div>`:""}
     <div class="board-foot"><div class="scan"><div class="qr-box" id="qrBoard"></div><div><strong>Can't find it? Scan here</strong><div class="hint">Search every shop on your phone</div></div></div>
       <div class="hint">${all.length} shops</div></div>`;
-  drawQR($("#qrBoard"),110);wireSeg(b);
+  drawQR($("#qrBoard"),170);wireSeg(b);
   $("#fs").addEventListener("click",()=>{try{document.fullscreenElement?document.exitFullscreen():b.requestFullscreen()}catch(e){}});
 }
 
