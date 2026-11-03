@@ -170,6 +170,7 @@ const floorRank=f=>{const i=FLOORS.indexOf(f);return i<0?99:i};
 const byFloor=(a,b)=>floorRank(a.floor)-floorRank(b.floor)||a.name.localeCompare(b.name);
 function imgUrl(u){u=String(u||"").trim();if(!/^https?:\/\//i.test(u))return"";
   const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:.*&)?id=)([\w-]+)/);return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`:u}
+function fixPhone(p){const d=String(p||"").replace(/\D/g,"");return /^[17]\d{8}$/.test(d)?"0"+d:p}
 function waLink(p){let d=String(p||"").replace(/\D/g,"");if(!d)return"";if(d.startsWith("0"))d="254"+d.slice(1);return"https://wa.me/"+d}
 const logoHTML=(t,cls="logo")=>`<div class="${cls}" style="--cat:var(${catOf(t.category).v})">${t.logo?`<img src="${esc(t.logo)}" alt="${esc(t.name)} logo" loading="lazy" onerror="this.replaceWith(document.createTextNode('${esc(initials(t.name))}'))">`:esc(initials(t.name))}</div>`;
 const shortFloor=f=>({"Basement":"B","Ground Floor":"GF","1st Floor":"1F","2nd Floor":"2F","3rd Floor":"3F","4th Floor":"4F"})[f]||f||"";
@@ -195,7 +196,7 @@ function toTenants(text){
   const ix={name:col2("name","trading name","shop name","tenant"),category:col2("category"),floor:col2("floor","level"),
     shop:col("shop","shop no","shop number","unit"),phone:col2("phone","whatsapp"),hours:col2("hours"),status:col2("status"),logo:col2("logo")};
   return rows.slice(1).map(r=>{const g=k=>ix[k]>=0?String(r[ix[k]]||"").trim():"";
-    return{name:g("name"),category:matchCat(g("category")),floor:matchFloor(g("floor")),shop:g("shop"),phone:g("phone"),hours:g("hours"),status:matchStatus(g("status")),logo:imgUrl(g("logo"))}})
+    return{name:g("name"),category:matchCat(g("category")),floor:matchFloor(g("floor")),shop:g("shop"),phone:fixPhone(g("phone")),hours:g("hours"),status:matchStatus(g("status")),logo:imgUrl(g("logo"))}})
     .filter(t=>t.name);
 }
 async function load(){
