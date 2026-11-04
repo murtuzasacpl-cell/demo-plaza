@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Demo Plaza Directory</title>
+<title>Mega City Directory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -11,10 +11,10 @@
 <script>
 /* ================== SETTINGS: edit these lines ================== */
 const CONFIG = {
-  mallName: "Demo Plaza",
-  tagline:  "Find any shop in seconds",
+  mallName: "Mega City",
+  tagline:  "Kisumu · Find any shop in seconds",
   // Building logo: a web link to an image (a Google Drive share link works). Leave "" to show initials.
-  logoUrl:  "",
+  logoUrl:  "logo.png",
   // Your Google Sheet, published as CSV (File > Share > Publish to web > CSV). Leave "" to use the list built into this file.
   sheetCsvUrl: "https://docs.google.com/spreadsheets/d/1UeQHnamo87ndQzJPmWbUvX6vuoOV-PgNdPAfhAcpgGo/gviz/tq?tqx=out:csv",
   // Link the QR code opens. Leave "" to use this page's own address.
@@ -29,8 +29,9 @@ const CONFIG = {
 :root{
   --bg:#f3f5f7; --surface:#ffffff; --ink:#13202a; --muted:#5a6a77; --line:#dbe2e8;
   --accent:#0a6a9e; --accent-ink:#ffffff; --band:#0d2b3e; --band-ink:#ffffff;
-  --c-food:#e0712c; --c-fashion:#cf4279; --c-tech:#2d6bd3; --c-bank:#2a955a;
-  --c-health:#8853c6; --c-grocery:#b98d0c; --c-services:#687581; --c-other:#46525d;
+  --c-food:#e0712c; --c-fashion:#e05aa0; --c-tech:#2d6bd3; --c-bank:#2a955a;
+  --c-health:#14907f; --c-beauty:#8853c6; --c-grocery:#b98d0c; --c-home:#8a5a2b; --c-ent:#d1386b;
+  --c-motor:#3d4f63; --c-office:#4f6fa8; --c-services:#687581; --c-other:#46525d;
   --warn:#c27c0e;
   --display:"Archivo","Arial Narrow",Arial,sans-serif;
   --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -56,6 +57,8 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
 .top{background:var(--band);color:var(--band-ink);padding:14px 20px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:14px;min-width:0}
 .brand-logo{width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.12);display:grid;place-items:center;overflow:hidden;flex:none;font:800 20px var(--display)}
+.brand-logo.wide{width:84px;background:#fff;padding:3px}
+.brand-logo.wide img{width:auto;height:auto;max-width:100%;max-height:100%;display:block}
 .brand-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
 .brand h1{font-size:22px;font-weight:800;letter-spacing:.01em}
 .brand p{margin:2px 0 0;opacity:.75;font-size:13px}
@@ -131,36 +134,137 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:v
 <footer id="foot"></footer>
 
 <script>
-const FALLBACK_CSV=`name,category,floor,shop,phone,hours,status,logo
-FreshMart Supermarket,Supermarket & Grocery,Ground Floor,A-01,0700100001,,Open,
-Kenya Demo Bank,Banks & Forex,Ground Floor,G-01,0700100002,,Open,
-Urban Threads,Fashion & Shoes,Ground Floor,G-02,0700100003,,Open,
-Sole Mates Shoes,Fashion & Shoes,Ground Floor,G-03,0700100004,,Open,
-PhoneHub,Phones & Electronics,Ground Floor,G-04,0700100005,,Open,
-Glow Beauty Salon,Health & Beauty,Ground Floor,G-05,0700100006,,Open,
-Health First Pharmacy,Health & Beauty,Ground Floor,G-06,0700100007,,Open,
-Savanna Grill,Food & Restaurants,Ground Floor,"G-07, G-08",0700100008,,Open,
-Java Corner,Food & Restaurants,Ground Floor,G-09,0700100009,,Open,
-Kids Kingdom,Other,Ground Floor,G-10,0700100010,,Open,
-Sweet Bites Kiosk,Food & Restaurants,Ground Floor,K-01,0700100011,,Open,
-Airtime Express,Services,Ground Floor,K-02,0700100012,,Open,
-Style Avenue,Fashion & Shoes,1st Floor,F-01,0700100013,,Open,
-Gadget World,Phones & Electronics,1st Floor,F-02,0700100014,,Open,
-Smile Dental Clinic,Health & Beauty,1st Floor,F-03,0700100015,,Coming Soon,
-Fit Zone Gym,Health & Beauty,1st Floor,F-04,0700100016,,Open,
-Bookworm Stationers,Services,1st Floor,F-06,0700100017,,Vacant,
-Golden Jewellers,Fashion & Shoes,1st Floor,F-07,0700100018,,Vacant,
-Example Associates,Services,2nd Floor,S-01,0700100019,,Open,
-Wakili & Co. Advocates,Services,2nd Floor,S-02,0700100020,,Coming Soon,
-Bright Futures Insurance,Services,2nd Floor,S-03,0700100021,,Open,
-Mega Tutors,Services,2nd Floor,S-04,0700100022,,Open,
+const FALLBACK_CSV=`name,category,about,floor,shop,phone,hours,status,logo
+Khushi Motors,Motoring,Motor showroom,Outdoor,,,,Open,
+Autoxpress,Motoring,Car service,Outdoor,,,,Open,
+Carstore Hub,Motoring,"Car wash, PPF installation & carpet wash",Outdoor,,,,Open,
+Bloom Surgical Centre,Health & Medical,In-patient & out-patient medical services,Outdoor,,,,Open,
+Tea Joint Parlor,Food & Restaurants,Chinese restaurant,Outdoor,,,,Open,
+Children Amusement World,Entertainment & Leisure,Children's play park,Outdoor,,,,Open,
+Garam Masala,Food & Restaurants,Bar & restaurant,Outdoor,,,,Open,
+The Vic Hotel & Vic Monami,Food & Restaurants,Restaurant & accommodation,Outdoor,,,,Open,
+Multi-Energy,Services,LPG gas retail & refill,Outdoor,,,,Open,
+CTM,Home & Furniture,"Ceramics, sanitary ware & brass ware",Ground Floor,Wing A,,,Open,
+Max Cure Hospitals,Health & Medical,Hospital & optical clinic,Ground Floor,Wing A,,,Open,
+Hotpoint Appliances,Phones & Electronics,Home & electronic appliances,Ground Floor,Wing A,,,Open,
+Victoria Courts,Home & Furniture,Furniture & home décor,Ground Floor,Wing A,,,Open,
+King Tiles,Home & Furniture,Tiles,Ground Floor,Wing A,,,Open,
+Vivace Dermatology,Health & Medical,Dermatology clinic,Ground Floor,Wing A,,,Open,
+Yasian Technology,Home & Furniture,Interior design & accessories,Ground Floor,Wing A,,,Open,
+Viara Vision,Fashion & Shoes,Undergarments,Ground Floor,Wing A,,,Open,
+Connect Coffee,Food & Restaurants,Coffee shop,Ground Floor,Wing A,,,Open,
+City Walk,Fashion & Shoes,"Shoes, clothing, bags & perfumes",Ground Floor,Wing A,,,Open,
+Flowform Pilates & Yoga Studio,Entertainment & Leisure,Pilates & yoga studio,Ground Floor,Wing A,,,Open,
+Zuriah Beauty Lounge,Beauty & Cosmetics,Beauty spa,Ground Floor,Wing A,,,Open,
+Image First,Fashion & Shoes,Uniforms,Ground Floor,Wing A,,,Open,
+Lexien Naturals,Beauty & Cosmetics,Natural beauty products,Ground Floor,Wing A,,,Open,
+Goodlife Pharmacy,Health & Medical,Pharmacy,Ground Floor,Wing A,,,Open,
+Naivas Supermarket,Supermarket & Grocery,Supermarket,Ground Floor,Wing A,,,Open,
+Baus Optical,Health & Medical,Optical services & accessories,Ground Floor,Wing B,,,Open,
+Phonelink,Phones & Electronics,Mobile phone sales & repair,Ground Floor,Wing B,,,Open,
+Aquapet,Other,"Aquariums, pet products & accessories",Ground Floor,Wing B,,,Open,
+Lewnora Akinyi Nyawade,Phones & Electronics,Phone shop,Ground Floor,Wing B,,,Open,
+Harriet Ndalo,Beauty & Cosmetics,Skin care & cosmetics,Ground Floor,Wing B,,,Open,
+Charming Studios,Services,Photo studio,Ground Floor,Wing B,,,Open,
+Da Bar (The Vic Hotel),Food & Restaurants,Bar & restaurant,Ground Floor,Wing B,,,Open,
+Dr. Shem Rakewa Dental,Health & Medical,Dental & oral health clinic,Ground Floor,Wing B,,,Open,
+Smart Gift Baby Shop,Other,Baby shop,Ground Floor,Wing B,,,Open,
+Carpet City,Home & Furniture,Carpets,Ground Floor,Wing B,,,Open,
+De Gentlemen Wear,Fashion & Shoes,Men's suits,Ground Floor,Wing B,,,Open,
+Hilton Perfumes,Beauty & Cosmetics,Perfumes,Ground Floor,Wing B,,,Open,
+Pharma Plus Pharmacy,Health & Medical,Pharmacy,Ground Floor,Wing B,,,Open,
+Dr. Mattress (Turea),Home & Furniture,"Mattresses, bedding & furniture",Ground Floor,Wing B,,,Open,
+Bata,Fashion & Shoes,Footwear,Ground Floor,Wing B,,,Open,
+"Nairobi Ear, Nose & Throat Clinic",Health & Medical,ENT clinic,Ground Floor,Wing B,,,Open,
+Farma Twenty Four,Health & Medical,Pharmacy,Ground Floor,Wing B,,,Open,
+Victoria Clothline,Fashion & Shoes,Fashion house,Ground Floor,Wing B,,,Open,
+Beautyland Boutique,Fashion & Shoes,Boutique,Ground Floor,Wing B,,,Open,
+Pheona Mbani,Fashion & Shoes,Boutique & wigs,Ground Floor,Wing B,,,Open,
+TransElgon Pharmaceuticals,Health & Medical,Pharmacy & clinic,Ground Floor,Wing B,,,Open,
+Alice Nyaoro,Fashion & Shoes,Boutique,Ground Floor,Wing B,,,Open,
+Imperial Barbers,Beauty & Cosmetics,Barbershop,Ground Floor,Wing B,,,Open,
+Kibali Afrika Insurance Agency,Offices & Agencies,Insurance agency,Ground Floor,Wing B,,,Open,
+San Marina Engineering,Services,Solar & engineering,Ground Floor,Wing B,,,Open,
+Dolphin Resources,Home & Furniture,Interior décor & accessories,Ground Floor,Wing B,,,Open,
+Lake Basin Dental,Health & Medical,Orthodontic clinic,Ground Floor,Wing B,,,Open,
+Susan Trends,Services,Printing shop,Ground Floor,Wing B,,,Open,
+Lakeland Cargo Logistics,Offices & Agencies,Logistics,Ground Floor,Wing B,,,Open,
+Western Computers,Phones & Electronics,Computers & accessories,Ground Floor,Wing B,,,Open,
+West Kenya Diagnostic & Imaging Centre,Health & Medical,Diagnostics & imaging,Ground Floor,Wing B,,,Open,
+Avenue Homecare,Health & Medical,Homecare & nursing services,Ground Floor,Wing B,,,Open,
+Dr. James Wilson Omolo Jaguga,Health & Medical,Obstetrics & gynaecology clinic,Ground Floor,Wing B,,,Open,
+Kisumu Endoscopy & Digestive Health Clinic,Health & Medical,Endoscopy & digestive health,Ground Floor,Wing B,,,Open,
+Olivia Adhiambo,Home & Furniture,Interiors & curtains,Ground Floor,Wing B,,,Open,
+Cold Slab,Food & Restaurants,Bakery & kitchen,Ground Floor,Wing B,,,Open,
+Staypace,Services,Studio,Ground Floor,Wing B,,,Open,
+Clara's Cake House,Food & Restaurants,Bakery,Ground Floor,Wing B,,,Open,
+Sage Telecommunications,Banks & Money,Safaricom M-Pesa services,Ground Floor,Wing B,,,Open,
+Dorothy Omondi,Other,Baby gift shop,Ground Floor,Wing B,,,Open,
+Titans Opticals,Health & Medical,Optical shop,Ground Floor,Wing B,,,Open,
+Co-operative Bank ATM,Banks & Money,ATM,Ground Floor,Wing B,,,Open,
+KCB Bank ATM,Banks & Money,ATM,Ground Floor,Wing B,,,Open,
+The Zorros Water Refill,Services,Drinking water refill,Ground Floor,Wing B,,,Open,
+Mac & More Solutions,Phones & Electronics,Apple phones & accessories,Ground Floor,Wing B,,,Open,
+Mega City Management Office,Offices & Agencies,Mall management & enquiries,Mezzanine Floor,Wing B,,,Open,
+Mega Cinemas,Entertainment & Leisure,Cinema,Mezzanine Floor,Wing B,,,Open,
+Collection Africa,Offices & Agencies,Debt management services,Mezzanine Floor,Wing B,,,Open,
+Self Help Africa,Offices & Agencies,NGO office,Mezzanine Floor,Wing B,,,Open,
+New Sky Africa,Offices & Agencies,NGO office,Mezzanine Floor,Wing B,,,Open,
+Fred Hollows,Offices & Agencies,NGO office,Mezzanine Floor,Wing B,,,Open,
+Salient Concepts,Services,Photo studio,Mezzanine Floor,Wing B,,,Open,
+Neilan Furniture,Home & Furniture,Furniture,Mezzanine Floor,Wing B,,,Open,
+SF Software Services,Offices & Agencies,Software services,Mezzanine Floor,Wing A & B,,,Open,
+Dr. Mattress (Turea),Home & Furniture,"Mattresses, bedding & furniture",Mezzanine Floor,Wing B,,,Open,
+Weza Care Solutions,Offices & Agencies,NGO office,Mezzanine Floor,Wing A,,,Open,
+Silver Africa Tours & Safaris,Offices & Agencies,Tours & travel agency,Mezzanine Floor,Wing A,,,Open,
+Elegant Doors,Home & Furniture,Doors,Mezzanine Floor,Wing A,,,Open,
+Khomundustrong Enterprises,Services,Cyber café,Mezzanine Floor,Wing A,,,Open,
+Vanny Wear,Fashion & Shoes,Turkish clothing,Mezzanine Floor,Wing A,,,Open,
+China Square,Supermarket & Grocery,Hypermarket,Mezzanine Floor,Wing A & B,,,Open,
+PATH,Offices & Agencies,NGO office,2nd Floor,Wing B,,,Open,
+Odds & Ends,Other,Retail,Ground Floor,"Annex, Block D",,,Open,
+Octagon Africa Financial Services,Offices & Agencies,Financial services,1st Floor,"Annex, Block D",,,Open,
+Teci Rides,Offices & Agencies,Tours & travel,1st Floor,"Annex, Block D",,,Open,
+Kelac International,Services,German language institute,1st Floor,"Annex, Block D",,,Open,
+Mellan Logistics,Offices & Agencies,Transport & logistics,1st Floor,"Annex, Block D",,,Open,
+General Adjusters Kenya,Offices & Agencies,Insurance claims management,1st Floor,"Annex, Block D",,,Open,
+Leke Nyanam Enterprises,Motoring,Car hire,1st Floor,"Annex, Block D",,,Open,
+Citadel International,Offices & Agencies,Risk management services,1st Floor,"Annex, Block D",,,Open,
+Dr. Winja,Offices & Agencies,Consultancy,1st Floor,"Annex, Block D",,,Open,
+Afrimatrix Data Solutions,Offices & Agencies,Market research & data analysis,1st Floor,"Annex, Block D",,,Open,
+Unicorn Connections,Motoring,Car hire,1st Floor,"Annex, Block D",,,Open,
+SF Software Services,Offices & Agencies,Software services,2nd Floor,"Annex, Block D",,,Open,
+Eugene Oloo,Fashion & Shoes,Sunglasses,Ground Floor,"Kiosk, Wing A",,,Open,
+Bramsan Kenya,Banks & Money,M-Pesa & money services,Ground Floor,"Kiosk, Wing B",,,Open,
+Catherine Akinyi Nyonje,Phones & Electronics,"Phones, accessories & money services",Ground Floor,"Kiosk, Wing B",,,Open,
+Ruth Adhiambo Okello,Beauty & Cosmetics,"Cosmetics, fashion items & money services",Ground Floor,"Kiosk, Wing B",,,Open,
+Maf Curio & African Investments,Fashion & Shoes,African wear & artifacts,Ground Floor,"Kiosk, Wing B",,,Open,
+Joan Bombo Okoth,Fashion & Shoes,African wear & artifacts,Ground Floor,"Kiosk, Wing B",,,Open,
+Mirriam Kimatu John,Fashion & Shoes,African wear & artifacts,Ground Floor,"Kiosk, Wing B",,,Open,
+Legend Territory,Fashion & Shoes,Jerseys & sportswear,Ground Floor,"Kiosk, Wing B",,,Open,
+Gordon Walter Opondo,Services,"Movies, phone accessories, printing & photocopying",Ground Floor,"Kiosk, Wing B",,,Open,
+The Hive,Supermarket & Grocery,Honey & honey products,Ground Floor,"Kiosk, Wing B",,,Open,
+Esther Akoth Ondiek,Beauty & Cosmetics,"Cosmetics, jewellery & sunglasses",Ground Floor,"Kiosk, Wing B",,,Open,
+Susan Owuor,Fashion & Shoes,African attire & accessories,Ground Floor,"Kiosk, Wing B",,,Open,
+Mohfit Designs,Fashion & Shoes,Footwear,Ground Floor,"Kiosk, Wing B",,,Open,
+Blessing Jewellery Shop,Fashion & Shoes,Jewellery,Ground Floor,"Kiosk, Wing B",,,Open,
+Airtel Money,Banks & Money,Airtel money services,Ground Floor,"Kiosk, Wing B",,,Open,
+Dot's Closet,Fashion & Shoes,Footwear & accessories,Ground Floor,"Kiosk, Wing B",,,Open,
+The Zorros Juice Bar,Food & Restaurants,Juice bar,Ground Floor,"Kiosk, Wing B",,,Open,
+Vincent Odhiambo,Phones & Electronics,Mobile phones & accessories,Mezzanine Floor,"Kiosk, Wing B",,,Open,
+Tinah Collection Cosmetics,Beauty & Cosmetics,Boutique & cosmetics,Mezzanine Floor,"Kiosk, Wing B",,,Open,
+Neema Wasonga Omondi,Phones & Electronics,Computer accessories,Mezzanine Floor,"Kiosk, Wing B",,,Open,
+Exquisite Scents & Beauty,Beauty & Cosmetics,Perfumes,Mezzanine Floor,"Kiosk, Wing B",,,Open,
 `;
 const CATS=[
-  {k:"Food & Restaurants",v:"--c-food"},{k:"Fashion & Shoes",v:"--c-fashion"},
-  {k:"Phones & Electronics",v:"--c-tech"},{k:"Banks & Forex",v:"--c-bank"},
-  {k:"Health & Beauty",v:"--c-health"},{k:"Supermarket & Grocery",v:"--c-grocery"},
-  {k:"Services",v:"--c-services"},{k:"Other",v:"--c-other"}];
-const FLOORS=["Ground Floor","1st Floor","2nd Floor","3rd Floor","4th Floor","Basement"];
+  {k:"Supermarket & Grocery",v:"--c-grocery"},{k:"Food & Restaurants",v:"--c-food"},
+  {k:"Fashion & Shoes",v:"--c-fashion"},{k:"Beauty & Cosmetics",v:"--c-beauty"},
+  {k:"Health & Medical",v:"--c-health"},{k:"Phones & Electronics",v:"--c-tech"},
+  {k:"Home & Furniture",v:"--c-home"},{k:"Banks & Money",v:"--c-bank"},
+  {k:"Entertainment & Leisure",v:"--c-ent"},{k:"Motoring",v:"--c-motor"},
+  {k:"Offices & Agencies",v:"--c-office"},{k:"Services",v:"--c-services"},
+  {k:"Other",v:"--c-other"}];
+const FLOORS=["Ground Floor","Mezzanine Floor","1st Floor","2nd Floor","3rd Floor","4th Floor","Outdoor","Basement"];
 const S={tenants:[],loaded:false,error:"",updated:null,view:"directory",group:"floor",q:"",cat:"All",floor:"All"};
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -168,12 +272,12 @@ const catOf=k=>CATS.find(c=>c.k===k)||CATS[CATS.length-1];
 const initials=n=>(n||"?").split(/\s+/).filter(w=>/^[A-Za-z0-9]/.test(w)).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 const floorRank=f=>{const i=FLOORS.indexOf(f);return i<0?99:i};
 const byFloor=(a,b)=>floorRank(a.floor)-floorRank(b.floor)||a.name.localeCompare(b.name);
-function imgUrl(u){u=String(u||"").trim();if(!/^https?:\/\//i.test(u))return"";
+function imgUrl(u){u=String(u||"").trim();if(/^[\w.\/-]+\.(png|jpe?g|webp|svg|gif)$/i.test(u))return u;if(!/^https?:\/\//i.test(u))return"";
   const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:.*&)?id=)([\w-]+)/);return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`:u}
 function fixPhone(p){const d=String(p||"").replace(/\D/g,"");return /^[17]\d{8}$/.test(d)?"0"+d:p}
 function waLink(p){let d=String(p||"").replace(/\D/g,"");if(!d)return"";if(d.startsWith("0"))d="254"+d.slice(1);return"https://wa.me/"+d}
 const logoHTML=(t,cls="logo")=>`<div class="${cls}" style="--cat:var(${catOf(t.category).v})">${t.logo?`<img src="${esc(t.logo)}" alt="${esc(t.name)} logo" loading="lazy" onerror="this.replaceWith(document.createTextNode('${esc(initials(t.name))}'))">`:esc(initials(t.name))}</div>`;
-const shortFloor=f=>({"Basement":"B","Ground Floor":"GF","1st Floor":"1F","2nd Floor":"2F","3rd Floor":"3F","4th Floor":"4F"})[f]||f||"";
+const shortFloor=f=>({"Basement":"B","Outdoor":"Outdoor","Mezzanine Floor":"MZ","Ground Floor":"GF","1st Floor":"1F","2nd Floor":"2F","3rd Floor":"3F","4th Floor":"4F"})[f]||f||"";
 
 /* ---- reading the list ---- */
 function parseCSV(t){const rows=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];
@@ -183,6 +287,7 @@ function parseCSV(t){const rows=[];let r=[],f="",q=false;for(let i=0;i<t.length;
 function matchCat(v){v=String(v||"").toLowerCase().trim();if(!v)return"Other";
   const hit=CATS.find(c=>c.k.toLowerCase()===v)||CATS.find(c=>c.k.toLowerCase().split(/[ &]+/).some(w=>w.length>3&&v.includes(w)));return hit?hit.k:"Other"}
 function matchFloor(v){v=String(v||"").toLowerCase().trim();if(!v)return"Ground Floor";
+  if(/mezz/.test(v))return"Mezzanine Floor";if(/out/.test(v))return"Outdoor";
   if(/^(g|gf|ground)/.test(v))return"Ground Floor";if(/^(b|basement|lower)/.test(v))return"Basement";
   if(/^first/.test(v))return"1st Floor";if(/^second/.test(v))return"2nd Floor";if(/^third/.test(v))return"3rd Floor";if(/^fourth/.test(v))return"4th Floor";
   const n=v.match(/\d/);return n&&FLOORS.find(f=>f.startsWith(n[0]))||"Ground Floor"}
@@ -193,10 +298,10 @@ function toTenants(text){
   const head=rows[0].map(h=>h.toLowerCase().trim());
   const col=(...n)=>head.findIndex(h=>n.some(x=>h===x));
   const col2=(...n)=>{const e=col(...n);return e>=0?e:head.findIndex(h=>n.some(x=>h.includes(x)))};
-  const ix={name:col2("name","trading name","shop name","tenant"),category:col2("category"),floor:col2("floor","level"),
+  const ix={name:col2("name","trading name","shop name","tenant"),category:col2("category"),about:col2("about","nature","description"),floor:col2("floor","level"),
     shop:col("shop","shop no","shop number","unit"),phone:col2("phone","whatsapp"),hours:col2("hours"),status:col2("status"),logo:col2("logo")};
   return rows.slice(1).map(r=>{const g=k=>ix[k]>=0?String(r[ix[k]]||"").trim():"";
-    return{name:g("name"),category:matchCat(g("category")),floor:matchFloor(g("floor")),shop:g("shop"),phone:fixPhone(g("phone")),hours:g("hours"),status:matchStatus(g("status")),logo:imgUrl(g("logo"))}})
+    return{name:g("name"),category:matchCat(g("category")),about:g("about"),floor:matchFloor(g("floor")),shop:g("shop"),phone:fixPhone(g("phone")),hours:g("hours"),status:matchStatus(g("status")),logo:imgUrl(g("logo"))}})
     .filter(t=>t.name);
 }
 async function load(){
@@ -204,20 +309,20 @@ async function load(){
     try{const sep=CONFIG.sheetCsvUrl.includes("?")?"&":"?";
       const r=await fetch(CONFIG.sheetCsvUrl+sep+"t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;
       const list=toTenants(await r.text());if(!list.length)throw 0;
-      S.tenants=list;S.error="";S.updated=new Date();S.loaded=true;return}
+      S.tenants=list;S.error="";S.fallback=false;S.updated=new Date();S.loaded=true;return}
     catch(e){S.error=S.tenants.length?"Couldn't refresh the shop list just now. Showing the last version.":"";if(S.tenants.length){S.loaded=true;return}}
   }
-  S.tenants=toTenants(FALLBACK_CSV);S.updated=S.updated||null;S.loaded=true;
+  S.tenants=toTenants(FALLBACK_CSV);S.updated=null;S.loaded=true;S.fallback=!!CONFIG.sheetCsvUrl;
 }
 
 /* ---- header ---- */
 function paintHeader(){
   document.title=(CONFIG.mallName||"Mall")+" Directory";
   $("#brandName").textContent=CONFIG.mallName||"Mall Directory";$("#brandTag").textContent=CONFIG.tagline||"";
-  const lg=imgUrl(CONFIG.logoUrl);$("#brandLogo").innerHTML=lg?`<img src="${esc(lg)}" alt="${esc(CONFIG.mallName)} logo">`:esc(initials(CONFIG.mallName||"Mall"));
+  const lg=imgUrl(CONFIG.logoUrl);$("#brandLogo").classList.toggle("wide",!!lg);$("#brandLogo").innerHTML=lg?`<img src="${esc(lg)}" alt="${esc(CONFIG.mallName)} logo">`:esc(initials(CONFIG.mallName||"Mall"));
   $("#tabDir").toggleAttribute("aria-current",S.view==="directory");if(S.view==="directory")$("#tabDir").setAttribute("aria-current","page");
   $("#tabBoard").toggleAttribute("aria-current",S.view==="board");if(S.view==="board")$("#tabBoard").setAttribute("aria-current","page");
-  $("#foot").textContent=S.updated?`Shop list updated ${S.updated.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`:"";
+  $("#foot").textContent=S.fallback?"Couldn't reach the Google Sheet, so this is the built-in shop list. Check this device's internet connection.":S.updated?`Shop list updated ${S.updated.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`:"";
 }
 const qrLink=()=>CONFIG.qrLink||location.href.split("#")[0];
 function drawQR(el,size){if(!el||typeof QRCode==="undefined")return;el.innerHTML="";new QRCode(el,{text:qrLink(),width:size,height:size,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M})}
@@ -264,11 +369,11 @@ function fillDirectory(){
   if(!S.loaded){grid.innerHTML=`<div class="empty">Loading shops…</div>`;return}
   const q=S.q.trim().toLowerCase();
   const list=all.filter(t=>(S.cat==="All"||t.category===S.cat)&&(S.floor==="All"||t.floor===S.floor)&&
-    (!q||[t.name,t.category,t.shop,t.floor].join(" ").toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
+    (!q||[t.name,t.category,t.about,t.shop,t.floor].join(" ").toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
   const card=t=>{const c=catOf(t.category);const wa=waLink(t.phone);
     return `<article class="card" style="--cat:var(${c.v})">${logoHTML(t)}
-      <div>${t.status==="Coming Soon"?`<span class="pill">Coming soon</span>`:""}<h3>${esc(t.name)}</h3><div class="meta">${esc(c.k)}${t.hours?" · "+esc(t.hours):""}</div>
-      <div class="where">${t.floor?`<span>${esc(t.floor)}</span>`:""}${t.shop?`<span>Shop ${esc(t.shop)}</span>`:""}</div>
+      <div>${t.status==="Coming Soon"?`<span class="pill">Coming soon</span>`:""}<h3>${esc(t.name)}</h3><div class="meta">${esc(t.about||c.k)}${t.hours?" · "+esc(t.hours):""}</div>
+      <div class="where">${t.floor?`<span>${esc(t.floor)}</span>`:""}${t.shop?`<span>${/\d/.test(t.shop)?"Shop ":""}${esc(t.shop)}</span>`:""}</div>
       ${t.phone?`<div class="actions"><a href="tel:${esc(t.phone.replace(/\s/g,""))}">Call ${esc(t.phone)}</a>${wa?`<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:""}</div>`:""}</div></article>`};
   grid.innerHTML=!list.length?`<div class="empty">${S.tenants.length?"No shops match your search.":"No shops listed yet."}</div>`:
     S.group==="floor"?floorGroups(list).map(g=>`<section class="fsec"><h2 class="fh">${esc(g.f)}<small>${g.items.length} ${g.items.length===1?"shop":"shops"}</small></h2><div class="grid">${g.items.map(card).join("")}</div></section>`).join(""):
@@ -280,7 +385,7 @@ function fillBoard(){
     ?floorGroups(all).map(g=>({title:g.f,color:"var(--ink)",items:g.items,tag:t=>t.shop}))
     :CATS.map(c=>({title:c.k,color:`var(${c.v})`,items:all.filter(t=>t.category===c.k).sort(byFloor),tag:t=>[t.shop,shortFloor(t.floor)].filter(Boolean).join(" · ")})).filter(g=>g.items.length);
   const used=CATS.filter(c=>all.some(t=>t.category===c.k));const lg=imgUrl(CONFIG.logoUrl);
-  b.innerHTML=`<div class="board-head"><div class="brand"><div class="brand-logo" style="width:64px;height:64px">${lg?`<img src="${esc(lg)}" alt="">`:esc(initials(CONFIG.mallName||"Mall"))}</div>
+  b.innerHTML=`<div class="board-head"><div class="brand"><div class="brand-logo${lg?" wide":""}" style="width:${lg?112:64}px;height:${lg?84:64}px">${lg?`<img src="${esc(lg)}" alt="">`:esc(initials(CONFIG.mallName||"Mall"))}</div>
       <div><h2>${esc(CONFIG.mallName||"Mall Directory")}</h2><p>Karibu · Welcome · Shop directory</p></div></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">${segHTML()}<button type="button" class="ghost" id="fs">Full screen</button></div></div>
     <div class="board-cols">${groups.length?groups.map(g=>`<section class="bcat" style="--cat:${g.color}"><h3><i></i>${esc(g.title)}</h3>
